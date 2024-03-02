@@ -1,0 +1,137 @@
+import sys
+import json
+from buttonFunctions import *
+from serialOperations import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QTimer
+
+
+#bu blog program her acildiginda sifirlanmasini sagliyor global variables program her acildiginda sabit bi degerde olmazsa program bozulur
+
+dataset = {"portStatus": False}
+objWrite = json.dumps(dataset, indent=1)
+with open("globalVariables.json","w") as f:
+    f.write(objWrite)
+
+
+def globalVarReading(index):
+
+    """
+    JSON Dosyasindan veri cekip alttaki indexlere gore istenen veriyi dondurur:
+
+    1)PortStatus
+
+    
+    """
+    globalVariablesJson = open("globalVariables.json","r")
+
+    globalVariables = globalVariablesJson.read()
+
+    obj = json.loads(globalVariables)
+
+    portStatus = bool(obj["portStatus"])
+
+    if index == 1:
+        return portStatus
+
+
+
+class Window(QWidget):
+    class setTextBox():
+
+        def __init__(self,locX,locY,width,height,readOnly,text,window):
+            self.textBox = QTextEdit(window)
+            self.textBox.setGeometry(locX,locY,width,height)
+            self.textBox.setReadOnly(readOnly)
+            self.textBox.setText(text)
+        def addText(self,text):
+            self.textBox.append(text)
+        def setText(self,text):
+            self.textBox.setText(text)
+    def __init__(self, parent=None):
+        super(Window,self).__init__(parent)
+        self.setFixedSize(960,540)
+        self.setWindowTitle("Tufan ElectroMobile Telemetry App")
+
+        self.timeTextBox = self.setTextBox(520,20,400,50,True,"test",self)
+        self.speedTextBox = self.setTextBox(520,90,400,50,True,"test",self)
+        self.batteryHeatTextBox = self.setTextBox(520,160,400,50,True,"test",self)
+        self.batterVoltageTextBox = self.setTextBox(520,230,400,50,True,"test",self)
+        self.energyRemainTextBox = self.setTextBox(520,300,400,50,True,"test",self)
+
+        self.portList = QComboBox(self)
+        self.portList.setGeometry(520, 370, 130, 50)
+        reloadButtonFunc(self.portList)
+
+        self.baudrate = QComboBox(self)
+        self.baudrate.setGeometry(670, 370, 130, 50)
+        self.baudrate.addItems(["300","1200","2400","4800","9600","19200","38400","57600","74880","115200","230400","250000"])
+        
+
+        self.reloadButton = QPushButton("Reload", self)
+        self.reloadButton.setGeometry(820, 370, 100,50)
+        self.reloadButton.clicked.connect(lambda: reloadButtonFunc(self.portList))
+
+        self.connectButton = QPushButton("Connect", self)
+        self.connectButton.setGeometry(520, 440, 190,50)
+        self.connectButton.clicked.connect(lambda: connectButtonFunc(self.connectButton,self.disconnectButton,self.reloadButton, self.portList,self.baudrate))
+        
+
+        self.disconnectButton = QPushButton("Disconnect", self)
+        self.disconnectButton.setGeometry(730, 440, 190,50)
+        self.disconnectButton.clicked.connect(lambda: disconnectButtonFunc(self.connectButton,self.disconnectButton,self.reloadButton, self.portList,self.baudrate))
+        self.disconnectButton.setEnabled(False)
+
+    
+
+
+    
+        
+            
+        
+
+     
+    
+        
+       
+def main():
+    app= QApplication(sys.argv)
+    window = Window()
+
+    dataTextBox = QTextEdit(window)
+    dataTextBox.setReadOnly(True)
+    dataTextBox.move(20, 20)
+    dataTextBox.setFixedSize(480,500)
+    
+    def portChecker():
+        portStatus = globalVarReading(1)
+        
+        
+        if portStatus == True:
+    
+            portOps = PortOperations(window.portList.currentText(),int(window.baudrate.currentText()))
+            portOps.portConnect()
+            print(portOps.portRead())
+            data = portOps.portRead()
+            dataTextBox.append(data)
+            decodedData = data.split(";")
+            window.timeTextBox.setText(f"Time: {decodedData[0]} ms")
+            window.speedTextBox.setText(f"Speed: {decodedData[1]} km/s")
+            window.batteryHeatTextBox.setText(f"Battery Heat: {decodedData[2]} C°")
+            window.batterVoltageTextBox.setText(f"Battery Voltage: {decodedData[3]} V")
+            window.energyRemainTextBox.setText(f"Energy Remain: {decodedData[4]}Wh")
+
+    qTimer = QTimer()
+    qTimer.setInterval(1000)
+    qTimer.timeout.connect(portChecker)
+    qTimer.start()
+    
+
+    
+    window.show()
+    sys.exit(app.exec())
+
+if __name__ == "__main__":
+    main()
