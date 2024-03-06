@@ -3,6 +3,8 @@
 #include"logger.h"
 
 
+// TODO: Reimplement these files when what kind of data will recieved from vCS(Veichle Control System)
+
 void logger(int logLevel,char* buffer)
 {
 	FILE* logFile;
