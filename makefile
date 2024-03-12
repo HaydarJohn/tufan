@@ -5,7 +5,7 @@ CFLAGS=$$(pkg-config --libs $(LIBS))
 PROGRAM_NAME=program
 
 all:
-	$(CC) GUI/gktExample.c -o $(PROGRAM_NAME) $(LFLAGS) $(CFLAGS)
+	$(CC) GUI/gktExample.c -o $(PROGRAM_NAME) $(LFLAGS) $(CFLAGS) -g
 
 run:
 	./$(PROGRAM_NAME)
