@@ -10,8 +10,15 @@ static void activate(GtkApplication* app, gpointer user_data)
 {
     GtkWidget* window;
     GtkWidget* button;
+    GtkWidget* button1;
+
     GtkWidget* box;
     
+
+    window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(window),"Tufan Elektromobil");
+    gtk_window_set_default_size(GTK_WINDOW(window),720,480);
+
 
     GtkWidget* portList; // The section that make posible to pick a uart port.
 
@@ -20,19 +27,18 @@ static void activate(GtkApplication* app, gpointer user_data)
 
     portList = gtk_list_box_new(); // This takes no parameter. IDK why
 
-    // gtk_widget_set_halign(portBox, GTK_ALIGN_START);
-    // gtk_widget_set_valign(portBox, GTK_ALIGN_START);
-  
+    gtk_widget_set_halign(portList, GTK_ALIGN_START);
+    gtk_widget_set_valign(portList, GTK_ALIGN_START);
+    gtk_window_set_child(GTK_WINDOW(window),portList);
+
+
     //core dump veriyordu surekli ben de https://www.youtube.com/watch?v=UHaJP2sQMic bu videodan biraz "esinlendim". Allah gtk nin belasini versin. Ama daha geciremedim. Surekli core dump aliyorum
 
 
 
 
 
-    window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window),"Tufan Elektromobil");
-    gtk_window_set_default_size(GTK_WINDOW(window),720,480);
-
+   
     box = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
     gtk_widget_set_halign(box, GTK_ALIGN_END);
     gtk_widget_set_valign(box, GTK_ALIGN_START);
@@ -40,9 +46,12 @@ static void activate(GtkApplication* app, gpointer user_data)
 
     button = gtk_button_new_with_label("Reset");
     g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
+    button1 = gtk_button_new_with_label("Reset");
+    g_signal_connect (button1, "clicked", G_CALLBACK (print_hello), NULL);
     //g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_window_destroy), window);
     
     gtk_box_append (GTK_BOX (box), button);
+    gtk_list_box_set_placeholder(GTK_LIST_BOX(portList),NULL);
 
     gtk_window_present(GTK_WINDOW(window));
 }
